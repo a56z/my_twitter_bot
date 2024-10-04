@@ -1,0 +1,23 @@
+# ignore the virtual environment directory
+venv/
+
+# ignore Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ignore logs and output files
+logs/
+*.log
+nohup.out
+bot_output.log
+
+# sensitive information
+config.py
+
+# ignore any data files
+data/
+
+# ignore test outputs
+tests/__pycache__/
+
