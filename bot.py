@@ -7,10 +7,8 @@ import time
 import logging
 import random
 from config import (
-    TWITTER_API_KEY,
-    TWITTER_API_SECRET,
-    TWITTER_ACCESS_TOKEN,
-    TWITTER_ACCESS_TOKEN_SECRET,
+    TWITTER_OAUTH_CLIENT_ID,
+    TWITTER_OAUTH_CLIENT_SECRET,
     OPENAI_API_KEY,
     TWEET_INTERVAL_MIN,
     TWEET_INTERVAL_MAX
@@ -26,7 +24,7 @@ logging.basicConfig(
 # Initialize OpenAI API
 openai.api_key = OPENAI_API_KEY
 
-def create_twitter_api():
+def create_twitter_client():
     try:
         auth = tweepy.OAuth1UserHandler(
             TWITTER_API_KEY,
@@ -34,10 +32,10 @@ def create_twitter_api():
             TWITTER_ACCESS_TOKEN,
             TWITTER_ACCESS_TOKEN_SECRET
         )
-        api = tweepy.API(auth)
-        api.verify_credentials()
-        logging.info("Twitter API authentication successful.")
-        return api
+        client = tweepy.API(auth)
+        client.verify_credentials() 
+        logging.info("Twitter API v1.1 client authentication successful.")
+        return client
     except Exception as e:
         logging.error("Error during Twitter API authentication", exc_info=True)
         raise e
@@ -78,26 +76,27 @@ def is_content_appropriate(tweet):
     # Implement content filtering logic if necessary
     return True
 
-def post_tweet(api, tweet, dry_run=False):
+def post_tweet(client, tweet, dry_run=False):
     if dry_run:
         print(f"Dry run - Tweet content: {tweet}")
         logging.info("Dry run - Tweet not posted.")
     else:
         try:
-            api.update_status(tweet)
+            client.update_status(tweet)  # OAuth 1.0a endpoint for posting a tweet
             logging.info("Tweet posted successfully.")
-        except tweepy.errors.TweepyException as e:
+        except tweepy.TweepyException as e:
             logging.error(f"Tweepy error occurred: {e}", exc_info=True)
         except Exception as e:
             logging.error("An unexpected error occurred while posting the tweet.", exc_info=True)
 
+
 def main():
-    twitter_api = create_twitter_api()
+    twitter_client = create_twitter_client()
     dry_run = False  # Set to True for testing without posting
     while True:
         tweet = generate_tweet()
         if tweet and is_content_appropriate(tweet):
-            post_tweet(twitter_api, tweet, dry_run=dry_run)
+            post_tweet(twitter_client, tweet, dry_run=dry_run)
         else:
             logging.warning("Generated tweet is inappropriate or empty. Skipping.")
         interval = random.randint(TWEET_INTERVAL_MIN, TWEET_INTERVAL_MAX)
