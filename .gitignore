@@ -21,3 +21,4 @@ data/
 # ignore test outputs
 tests/__pycache__/
 
+twitter_bot.db
